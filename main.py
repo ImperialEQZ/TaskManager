@@ -176,3 +176,50 @@ class MainTaskWindow(QMainWindow):# главное окно приложения
         buttonLayout.addWidget(self.saveButton)
 
         mainLayout.addLayout(buttonLayout)
+
+class TaskData:
+    def __init__(self):# конструктор
+        self.tasks = [] # Инициализация пустого список для хранения словарей задач
+        self.taskCounter = 0 # счетчик задач
+
+    def addTask(self, text):# добавление задачи
+        self.tasks.append({
+            "text": text, # добавляем текст
+            "completed": False, # статус выполнения по умолчанию False
+            "color_index": self.taskCounter % 16  # лимит индекса цветов от 0-15
+        })
+        self.taskCounter += 1 # обновляем счетчик задач
+
+    def toggleTaskCompletion(self, index, completed):
+        if 0 <= index < len(self.tasks): # является ли индекс допустимым
+            self.tasks[index]["completed"] = completed # Обновляет статус выполнения задачи
+
+    def deleteTask(self, index): # удаление задачи
+        if 0 <= index < len(self.tasks): # является ли индекс допустимым
+            self.tasks.pop(index) # удаление по указанному индексу
+
+    def clearTasks(self): # очищает список задач и сбрасывает счетчик
+        self.tasks = []
+        self.taskCounter = 0
+
+    def saveTasks(self): #сохраняет данные о задачах в tasks.json
+        try:
+            with open('tasks.json', 'w', encoding='utf-8') as f:# открытие файла
+                json.dump({ # сериализует данные в формат JSON
+                    "tasks": self.tasks,
+                    "counter": self.taskCounter
+                }, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            print(f"Error saving tasks: {e}")
+
+    def loadTasks(self):# загружает данные о задачах из файла tasks.json
+        try:
+            with open('tasks.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self.tasks = data.get("tasks", [])
+                self.taskCounter = data.get("counter", 0)
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.tasks = []
+            self.taskCounter = 0
+
+
