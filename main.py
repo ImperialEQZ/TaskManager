@@ -101,3 +101,78 @@ class TasksContainer(QWidget):# контейнер для задач
             # предотвращение утечки памяти
             if item.widget():
                 item.widget().deleteLater()# если элемент является виджетом, метод deleteLater() "планирует" удаление виджета
+
+class MainTaskWindow(QMainWindow):# главное окно приложения
+    def __init__(self, controller):# конструктор
+        super().__init__()
+        self.controller = controller # контролер для реализации логики
+        self.WindowSetup()
+        self.initializationUI()
+
+    def WindowSetup(self):# настрояка главного виджета (окна)
+        self.setWindowTitle("Task Manager")# название заголовочного окна
+        self.setFixedSize(700, 700)# фиксированный размер окна
+        self.setWindowIcon(QIcon("img/TaskManager.png"))# иконка окна
+
+    def initializationUI(self):
+        centralWidget = QWidget()# центральный виджет для всех элементов UI
+        self.setCentralWidget(centralWidget)
+        mainLayout = QVBoxLayout(centralWidget)# основной макет для организации всех элементов UI
+        mainLayout.setContentsMargins(25)# отступы вокруг элементов
+        mainLayout.setSpacing(20)# расстояние между элементами
+
+        # Заголовок
+        title = QLabel("TASK MANAGER")# создание и настраивание заголовка
+        title.setObjectName("title")
+        title.setAlignment(Qt.AlignCenter)# выравнивание по центру
+        mainLayout.addWidget(title)
+
+        # Показ статистики из менеджера задач
+        self.statsLabel = QLabel("0 задач | 0 завершено")
+        self.statsLabel.setObjectName("stats")
+        self.statsLabel.setAlignment(Qt.AlignCenter)
+        mainLayout.addWidget(self.statsLabel)
+
+        # окно ввода
+        inputLayout = QHBoxLayout()
+        inputLayout.setSpacing(15)
+
+        # Ввод задачи
+        self.taskInput = QLineEdit()
+        self.taskInput.setPlaceholderText("Введите новую задачу*")
+        self.taskInput.setMinimumHeight(45)
+        inputLayout.addWidget(self.taskInput)
+        # кнопка добавить задачу и ее характеристики
+        self.addButton = QPushButton("ДОБАВИТЬ")
+        self.addButton.setFixedWidth(120)
+        self.addButton.setMinimumHeight(45)
+        self.addButton.clicked.connect(self.controller.addTask)
+        inputLayout.addWidget(self.addButton)
+
+        mainLayout.addLayout(inputLayout)
+
+        # Область "прокрутки" задач
+        scrollArea = QScrollArea()
+        scrollArea.setWidgetResizable(True)
+        # контейнер с задачами
+        self.tasksContainer = TasksContainer()
+        scrollArea.setWidget(self.tasksContainer)
+
+        mainLayout.addWidget(scrollArea)
+
+        # основые кнопки
+        buttonLayout = QHBoxLayout()
+        buttonLayout.setSpacing(15)
+        # кнопка очистить все
+        self.clearButton = QPushButton("ОЧИСТИТЬ")
+        self.clearButton.clicked.connect(self.controller.clearTasks)
+        buttonLayout.addWidget(self.clearButton)
+
+        buttonLayout.addStretch()
+
+        # кнопка сохранения
+        self.saveButton = QPushButton("СОХРАНИТЬ")
+        self.saveButton.clicked.connect(self.controller.saveTasks)
+        buttonLayout.addWidget(self.saveButton)
+
+        mainLayout.addLayout(buttonLayout)
