@@ -1,9 +1,86 @@
 import os
 import sys
-import json
+import json #json файл вместо БД
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QPushButton, QLabel, QLineEdit,
                              QMessageBox, QScrollArea, QCheckBox)
 from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint
 from PyQt5.QtGui import QIcon, QFont, QColor, QPalette, QLinearGradient, QBrush
 
+
+class TaskElement(QWidget):# отдельный элемент задачи в списке задач
+    def __init__(self, text, colorID = 0, parent = None):# конструктор
+        super().__init__(parent)# родительский виджет к которому будет пренадлежать TaskElement
+        self.colorIndex = colorID
+        self.text = text
+        self.buildUi()
+        self.designVisuals()
+
+    def buildUi(self):# создание визуала
+        self.layout = QHBoxLayout(self)# создание макета для размещения элементов внутри виджета
+        self.layout.setContentsMargins(10, 15, 10, 15)# установка отступов (по часовой стрелке)
+
+        self.checkbox = QCheckBox() # создание checkbox для галочки о выпонлении задачи
+        self.checkbox.setFixedSize(25, 25)# фиксированный размер "точки" (флажка) о выполнении
+
+        self.label = QLabel(self.text)# создание текста задачи
+        self.label.setFont(QFont('Times New Roman', 14, QFont.Coursiv))# вид шрифта, размер, курсив
+
+        self.delete_btn = QPushButton("✕")# создание кнопки с крестиком для удаления задачи
+        self.delete_btn.setFixedSize(25, 25)# фиксированный размер
+
+        # добавляем все в QHBoxLayout
+        self.layout.addWidget(self.checkbox)
+        self.layout.addWidget(self.label)
+        self.layout.addStretch() # нужно, чтобы элементы были прижаты к левой стороне, а кнопка удаления - справа
+        self.layout.addWidget(self.delete_btn)
+
+    def designVisuals(self):
+        taskColors = [
+            "#20B2AA", "#00FFFF", "#87CEFA", "#00008B",
+            "#1E90FF", "#40E0D0", "#00CED1", "#00FF00",
+            "#BB6C8A", "#8B008B", "#4B0082", "#6A5ACD",
+            "#9ACD32", "#FFBCD9", "#FFAAA6", "#000080"
+        ]# список с кодами цветов
+
+        # Выбор цвета фона из списка на основе индекса цвета
+        backgroundColor = taskColors[self.colorIndex % len(taskColors)]# Использование % len(task_colors) для циклического перебора цветов, если индекс цвета выходит за пределы списка
+
+
+        textColor = "#343E40" if self.colorIndex % 4 < 2 else "#FFFAFA"# Определение цвет текста в зависимости от индекса цвета
+
+        # установление css стилей для виджета
+        self.setStyleSheet(f"""
+            TaskItem {{
+                background-color: {backgroundColor};
+                border-radius: 15px;
+                margin: 8px 0;
+            }}
+            TaskItem:hover {{
+                background-color: {QColor(backgroundColor).lighter(110).name()};
+            }}
+            QLabel {{
+                color: {textColor};
+                padding: 5px;
+            }}
+            QCheckBox::indicator {{
+                width: 20px;
+                height: 20px;
+                border: 2px solid #00CED1;
+                border-radius: 10px;
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: #3EB489;
+                border: 3px solid #3EB489;
+            }}
+            QPushButton {{
+                background-color: transparent;
+                color: {textColor};
+                font-size: 18px;
+                font-weight: bold;
+                border: none;
+            }}
+            QPushButton:hover {{
+                color: #7366BD;
+            }}
+        """)
