@@ -123,7 +123,7 @@ class MainTaskWindow(QMainWindow):  # главное окно приложени
         mainLayout.addWidget(title)
 
         # Показ статистики из менеджера задач
-        self.statsLabel = QLabel("0 задач | 0 завершено")
+        self.statsLabel = QLabel("Нет задач")
         self.statsLabel.setObjectName("stats")
         self.statsLabel.setAlignment(Qt.AlignCenter)
         mainLayout.addWidget(self.statsLabel)
